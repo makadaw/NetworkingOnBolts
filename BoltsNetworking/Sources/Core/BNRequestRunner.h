@@ -21,7 +21,8 @@ typedef void(^BNProgressBlock)(float);
 
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithConnector:(id<BNNetworkConnector>)connector NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithConnector:(id<BNNetworkConnector>)connector;
+- (instancetype)initWithConnector:(id<BNNetworkConnector>)connector requestThrottleInterval:(NSTimeInterval)requestThrottleInterval NS_DESIGNATED_INITIALIZER;
 
 - (BFTask<__kindof id> *)runRequestAsync:(BNRequest *)request cancellationToken:(nullable BFCancellationToken *)cancellationToken;
 

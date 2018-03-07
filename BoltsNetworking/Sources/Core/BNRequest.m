@@ -9,13 +9,14 @@
 #import "BNRequest.h"
 
 BNRequestParameters BNDefaultParameters() {
-    return (BNRequestParameters){.timeout=30, .throttleInterval=0};
+    return (BNRequestParameters){.timeout=30, .throttleInterval=0, .retryAttempts=0};
 }
 
 @interface BNRequest ()
 @property (nonatomic) BNRequestBuilder requestBuilder;
 @property (nonatomic) BNResponseParser responseParser;
 @property (nonatomic) BNRequestCompletion completion;
+@property (nonatomic) dispatch_queue_t deliveryQueue;
 
 @end
 
@@ -42,18 +43,22 @@ BNRequestParameters BNDefaultParameters() {
     return self;
 }
 
-- (void)buildRequest:(NSMutableURLRequest *)request {
-    self.requestBuilder(request);
+- (NSURLRequest *)buildRequest {
+    return self.requestBuilder();
 }
 
 - (BNResult *)parseResponse:(id)rawResponse {
     return self.responseParser(rawResponse);
 }
 
-
 - (void)callCompletionWithValue:(nullable id)value error:(nullable NSError *)error {
-    // TODO call completion on right queue
-    dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_queue_t queue;
+    if (self.deliveryQueue) {
+        queue = self.deliveryQueue;
+    } else {
+        queue = dispatch_get_main_queue();
+    }
+    dispatch_async(queue, ^{
         self.completion(value, error);
     });    
 }

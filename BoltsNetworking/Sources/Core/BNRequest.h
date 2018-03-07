@@ -16,6 +16,7 @@ typedef NS_ENUM(NSUInteger, BNHTTPMethod){
 typedef struct BNRequestParameters {
     NSTimeInterval timeout;
     NSTimeInterval throttleInterval;
+    NSInteger retryAttempts;
 } BNRequestParameters;
 
 extern BNRequestParameters BNDefaultParameters(void);
@@ -35,8 +36,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface BNRequest<__covariant Response, RawResponse> : NSObject
 
-typedef void(^BNRequestBuilder)(NSMutableURLRequest *);
-typedef BNResult<Response>* _Nonnull (^BNResponseParser)(RawResponse _Nullable);
+typedef NSURLRequest *_Nonnull(^BNRequestBuilder)(void);
+typedef BNResult<Response> *_Nonnull(^BNResponseParser)(RawResponse _Nullable);
 typedef void (^ _Nullable BNRequestCompletion)(Response _Nullable, NSError * _Nullable);
 
 @property (nonatomic, readonly) BNRequestParameters parameters;
@@ -48,8 +49,8 @@ typedef void (^ _Nullable BNRequestCompletion)(Response _Nullable, NSError * _Nu
                             parameters:(BNRequestParameters)parameters
                             completion:(BNRequestCompletion)completion NS_DESIGNATED_INITIALIZER;
 
-- (void)buildRequest:(NSMutableURLRequest *)request;
-- (BNResult<Response> *)parseResponse:(RawResponse)rawResponse;
+- (NSURLRequest *)buildRequest;
+- (BNResult<Response> *)parseResponse:(RawResponse const)rawResponse;
 
 - (void)callCompletionWithValue:(nullable Response)value error:(nullable NSError *)error;
 

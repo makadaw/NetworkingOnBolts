@@ -37,8 +37,8 @@
 }
 
 - (void)quoteOfTheDay:(QODCallback)callback {
-    BNRequest *request = [[BNRequest alloc] initWithRequestBuilder:^(NSMutableURLRequest *request){
-        request.URL = [NSURL URLWithString:@"https://quotes.rest/qod.json"];
+    BNRequest *request = [[BNRequest alloc] initWithRequestBuilder:^NSURLRequest *(){
+        return [NSURLRequest requestWithURL:[NSURL URLWithString:@"https://quotes.rest/qod.json"]];
     }
                                                     responseParser:^BNResult *(NSData *response) {
                                                         return [BNResult value:[Quote new]];

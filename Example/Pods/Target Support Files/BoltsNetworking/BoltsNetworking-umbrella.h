@@ -12,6 +12,7 @@
 
 #import "BNNetworkConnector.h"
 #import "BNRequest.h"
+#import "BNRequestBuilder.h"
 #import "BNRequestRunner.h"
 #import "BNConnectorURLSession.h"
 

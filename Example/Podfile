@@ -9,4 +9,5 @@ target 'Example' do
   # Pods for Example
   pod "BoltsNetworking", :path => "../", :testspecs => ["Tests"] 
 
+  pod "AFNetworking"
 end

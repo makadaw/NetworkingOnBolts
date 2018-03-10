@@ -7,6 +7,7 @@
 //
 
 #import "BNRequest.h"
+#import "BNRequestRetryStrategy.h"
 
 BNRequestParameters BNDefaultParameters() {
     return (BNRequestParameters){.timeout=30, .throttleInterval=0, .retryAttempts=0};
@@ -15,6 +16,7 @@ BNRequestParameters BNDefaultParameters() {
 @interface BNRequest ()
 @property (nonatomic) BNRequestBuilder requestBuilder;
 @property (nonatomic) BNResponseParser responseParser;
+@property (nonatomic) BNRequestParameters parameters;
 @property (nonatomic) BNRequestCompletion completion;
 @property (nonatomic) dispatch_queue_t deliveryQueue;
 
@@ -41,6 +43,10 @@ BNRequestParameters BNDefaultParameters() {
         _completion = completion;
     }
     return self;
+}
+
+- (BNRequestRetryStrategy *)retryStrategy {
+    return [BNRequestRetryStrategy strategyWithParameters:self.parameters];
 }
 
 - (NSURLRequest *)buildRequest {

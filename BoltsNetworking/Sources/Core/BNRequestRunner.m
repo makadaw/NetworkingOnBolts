@@ -13,8 +13,7 @@
 #import <Bolts/BFExecutor.h>
 #import "BNNetworkConnector.h"
 #import "BNRequest.h"
-
-NSTimeInterval const BNRequestRunnerDefaultRequestThrottleInterval = 1.0;
+#import "BNRequestRetryStrategy.h"
 
 @interface BNRequestRunner ()
 @property (nonatomic) id<BNNetworkConnector> connector;
@@ -26,14 +25,9 @@ NSTimeInterval const BNRequestRunnerDefaultRequestThrottleInterval = 1.0;
 @implementation BNRequestRunner
 
 - (instancetype)initWithConnector:(id<BNNetworkConnector>)connector {
-    return [self initWithConnector:connector requestThrottleInterval:BNRequestRunnerDefaultRequestThrottleInterval];
-}
-
-- (instancetype)initWithConnector:(id<BNNetworkConnector>)connector requestThrottleInterval:(NSTimeInterval)requestThrottleInterval {
     if ((self = [super init])) {
         _connector = connector;
         _workerQueue = dispatch_queue_create("bolts.networking.runner", DISPATCH_QUEUE_CONCURRENT);
-        _requestThrottleInterval = requestThrottleInterval;
     }
     return self;
 }
@@ -46,7 +40,7 @@ NSTimeInterval const BNRequestRunnerDefaultRequestThrottleInterval = 1.0;
         return [[sSelf buildURLRequestFromRequest:request] continueWithBlock:^id(BFTask<NSURLRequest *> *task) {
             return [sSelf.connector performDataURLRequest:task.result forRequest:request cancellationToken:cancellationToken];
         }];
-    } requestParameters:request.parameters cancellationToken:cancellationToken]
+    } request:request cancellationToken:cancellationToken]
             continueWithBlock:^id _Nullable(BFTask *task) {
         
                 // If there are some errors in request just return task back
@@ -82,31 +76,23 @@ NSTimeInterval const BNRequestRunnerDefaultRequestThrottleInterval = 1.0;
 #pragma mark - Requests runner
 
 - (BFTask *)performRequestRunningBlock:(nonnull id (^)(void))block
-                     requestParameters:(BNRequestParameters)parameters
+                               request:(BNRequest *)request
                      cancellationToken:(BFCancellationToken *)cancellationToken {
     if (cancellationToken.cancellationRequested) {
         return [BFTask cancelledTask];
     }
-    
-    // Check request parameters
-    if (!(parameters.retryAttempts > 0)) {
+    BNRequestRetryStrategy *retryStrategy = request.retryStrategy;
+    // Check retry strategy. If we don't need to retry this request return a normal task
+    if (!retryStrategy && ![retryStrategy needsToRetry]) {
         return block();
     }
-    
-    NSTimeInterval delay = parameters.throttleInterval > 0?:self.requestThrottleInterval;
-    
-    // Add some random to delay
-    delay += self.requestThrottleInterval * ((double)(arc4random() & 0x0FFFF) / (double)0x0FFFF);
-    
     return [self performRequestRunningBlock:block
-                                      delay:delay
-                                 forAttempt:parameters.retryAttempts
+                              retryStrategy:retryStrategy
                           cancellationToken:cancellationToken];
 }
 
 - (BFTask *)performRequestRunningBlock:(nonnull id (^)(void))block
-                                 delay:(NSTimeInterval)delay
-                            forAttempt:(NSUInteger)attempt
+                         retryStrategy:(BNRequestRetryStrategy *)retryStrategy
                      cancellationToken:(BFCancellationToken *)cancellationToken {
     __weak typeof(self) wSelf = self;
     return [block() continueWithBlock:^id _Nullable(BFTask *task) {
@@ -115,11 +101,11 @@ NSTimeInterval const BNRequestRunnerDefaultRequestThrottleInterval = 1.0;
             return task;
         }
         
-        if (task.error && attempt > 1) {
-            return [[BFTask taskWithDelay:delay cancellationToken:cancellationToken] continueWithBlock:^id _Nullable(BFTask<BFVoid> *task) {
+        if (task.error && [retryStrategy needsToRetry]) {
+            return [[BFTask taskWithDelay:retryStrategy.delay cancellationToken:cancellationToken] continueWithBlock:^id _Nullable(BFTask<BFVoid> *task) {
+                [retryStrategy countAttempt];
                 return [sSelf performRequestRunningBlock:block
-                                                   delay:delay * 2
-                                              forAttempt:attempt-1
+                                           retryStrategy:retryStrategy
                                        cancellationToken:cancellationToken];
             } cancellationToken:cancellationToken];
         }

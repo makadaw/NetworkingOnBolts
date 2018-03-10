@@ -1,4 +1,19 @@
 PODS:
+  - AFNetworking (3.2.0):
+    - AFNetworking/NSURLSession (= 3.2.0)
+    - AFNetworking/Reachability (= 3.2.0)
+    - AFNetworking/Security (= 3.2.0)
+    - AFNetworking/Serialization (= 3.2.0)
+    - AFNetworking/UIKit (= 3.2.0)
+  - AFNetworking/NSURLSession (3.2.0):
+    - AFNetworking/Reachability
+    - AFNetworking/Security
+    - AFNetworking/Serialization
+  - AFNetworking/Reachability (3.2.0)
+  - AFNetworking/Security (3.2.0)
+  - AFNetworking/Serialization (3.2.0)
+  - AFNetworking/UIKit (3.2.0):
+    - AFNetworking/NSURLSession
   - Bolts (1.9.0):
     - Bolts/AppLinks (= 1.9.0)
     - Bolts/Tasks (= 1.9.0)
@@ -21,6 +36,7 @@ PODS:
   - OCMock (3.4.1)
 
 DEPENDENCIES:
+  - AFNetworking
   - BoltsNetworking (from `../`)
   - BoltsNetworking/Tests (from `../`)
 
@@ -29,11 +45,12 @@ EXTERNAL SOURCES:
     :path: ../
 
 SPEC CHECKSUMS:
+  AFNetworking: 8ac6017b94ea105479f7776e5288e48ae9c59bb4
   Bolts: ac6567323eac61e203f6a9763667d0f711be34c8
   BoltsNetworking: 8126b996ef3c8bea774d2aa58d912a0498fe2f41
   Expecta: 3b6bd90a64b9a1dcb0b70aa0e10a7f8f631667d5
   OCMock: 2cd0716969bab32a2283ff3a46fd26a8c8b4c5e3
 
-PODFILE CHECKSUM: cf8dbef2c9c9b3746571af3dc18babe1374206d5
+PODFILE CHECKSUM: a5316e589e8c246d0c09cb89b13644d609dd56eb
 
 COCOAPODS: 1.4.0

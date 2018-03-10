@@ -13,10 +13,12 @@
 #import <Bolts/BFExecutor.h>
 #import "BNNetworkConnector.h"
 #import "BNRequest.h"
+#import "BNRequestBuildersRegistry.h"
 #import "BNRequestRetryStrategy.h"
 
 @interface BNRequestRunner ()
 @property (nonatomic) id<BNNetworkConnector> connector;
+@property (nonatomic) BNRequestBuildersRegistry *builderRegistry;
 @property (nonatomic) dispatch_queue_t workerQueue;
 @property (assign) NSTimeInterval requestThrottleInterval;
 
@@ -24,9 +26,11 @@
 
 @implementation BNRequestRunner
 
-- (instancetype)initWithConnector:(id<BNNetworkConnector>)connector {
+- (instancetype)initWithConnector:(id<BNNetworkConnector>)connector
+           requestBuilderRegistry:(BNRequestBuildersRegistry *)builderRegistry {
     if ((self = [super init])) {
         _connector = connector;
+        _builderRegistry = builderRegistry;
         _workerQueue = dispatch_queue_create("bolts.networking.runner", DISPATCH_QUEUE_CONCURRENT);
     }
     return self;
@@ -69,7 +73,7 @@
 
 - (BFTask<NSURLRequest *> *)buildURLRequestFromRequest:(BNRequest *)request {
     return [BFTask taskFromExecutor:[BFExecutor executorWithDispatchQueue:self.workerQueue] withBlock:^id _Nonnull{
-        return [request buildRequest];
+        return [request buildRequestWithBuilder:[self.builderRegistry builderForClass:nil]];
     }];
 }
 

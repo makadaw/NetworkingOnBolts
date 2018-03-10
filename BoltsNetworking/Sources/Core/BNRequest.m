@@ -14,7 +14,7 @@ BNRequestParameters BNDefaultParameters() {
 }
 
 @interface BNRequest ()
-@property (nonatomic) BNRequestBuilder requestBuilder;
+@property (nonatomic) BNRequestBuilderBlock requestBuilder;
 @property (nonatomic) BNResponseParser responseParser;
 @property (nonatomic) BNRequestParameters parameters;
 @property (nonatomic) BNRequestCompletion completion;
@@ -32,7 +32,7 @@ BNRequestParameters BNDefaultParameters() {
     return nil;
 }
 
-- (instancetype)initWithRequestBuilder:(BNRequestBuilder)requestBuilder
+- (instancetype)initWithRequestBuilder:(BNRequestBuilderBlock)requestBuilder
                         responseParser:(BNResponseParser)parser
                             parameters:(BNRequestParameters)parameters
                             completion:(BNRequestCompletion)completion {
@@ -49,8 +49,8 @@ BNRequestParameters BNDefaultParameters() {
     return [BNRequestRetryStrategy strategyWithParameters:self.parameters];
 }
 
-- (NSURLRequest *)buildRequest {
-    return self.requestBuilder();
+- (NSURLRequest *)buildRequestWithBuilder:(id<BNRequestBuilder>)builder {
+    return self.requestBuilder(builder);
 }
 
 - (BNResult *)parseResponse:(id)rawResponse {

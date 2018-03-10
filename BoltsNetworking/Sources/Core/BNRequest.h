@@ -17,10 +17,10 @@ typedef struct BNRequestParameters {
     NSTimeInterval throttleInterval;
     NSUInteger retryAttempts;
 } BNRequestParameters;
-
 extern BNRequestParameters BNDefaultParameters(void);
 
 @class BNRequestRetryStrategy;
+@protocol BNRequestBuilder;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -37,20 +37,20 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface BNRequest<__covariant Response, RawResponse> : NSObject
 
-typedef NSURLRequest *_Nonnull(^BNRequestBuilder)(void);
+typedef NSURLRequest *_Nonnull(^BNRequestBuilderBlock)(id<BNRequestBuilder>);
 typedef BNResult<Response> *_Nonnull(^BNResponseParser)(RawResponse _Nullable);
 typedef void (^ _Nullable BNRequestCompletion)(Response _Nullable, NSError * _Nullable);
 
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithRequestBuilder:(BNRequestBuilder)requestBuilder
+- (instancetype)initWithRequestBuilder:(BNRequestBuilderBlock)requestBuilder
                         responseParser:(BNResponseParser)parser
                             parameters:(BNRequestParameters)parameters
                             completion:(BNRequestCompletion)completion NS_DESIGNATED_INITIALIZER;
 
 - (nullable BNRequestRetryStrategy *)retryStrategy;
 
-- (NSURLRequest *)buildRequest;
+- (NSURLRequest *)buildRequestWithBuilder:(id<BNRequestBuilder>)builder;
 - (BNResult<Response> *)parseResponse:(RawResponse const)rawResponse;
 
 - (void)callCompletionWithValue:(nullable Response)value error:(nullable NSError *)error;

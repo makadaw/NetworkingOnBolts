@@ -15,6 +15,7 @@
 		4604A72B203E1C0800465ACC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4604A729203E1C0800465ACC /* LaunchScreen.storyboard */; };
 		4604A72E203E1C0800465ACC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4604A72D203E1C0800465ACC /* main.m */; };
 		46B038C320460F3800CF97E6 /* QuoteClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 46B038C220460F3800CF97E6 /* QuoteClient.m */; };
+		46DE99FB205409F100A45AF5 /* QuoteRequestBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = 46DE99FA205409F100A45AF5 /* QuoteRequestBuilder.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -47,6 +48,8 @@
 		46B038C220460F3800CF97E6 /* QuoteClient.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QuoteClient.m; sourceTree = "<group>"; };
 		46DE99E2204FCBCB00A45AF5 /* ExampleTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ExampleTests.m; sourceTree = "<group>"; };
 		46DE99E4204FCBCB00A45AF5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		46DE99F9205409F100A45AF5 /* QuoteRequestBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QuoteRequestBuilder.h; sourceTree = "<group>"; };
+		46DE99FA205409F100A45AF5 /* QuoteRequestBuilder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QuoteRequestBuilder.m; sourceTree = "<group>"; };
 		A390F46C5332AF59AFDA225F /* Pods-Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Example/Pods-Example.debug.xcconfig"; sourceTree = "<group>"; };
 		FB32795FDE5EF191A8352C5A /* Pods-Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-Example/Pods-Example.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -104,6 +107,8 @@
 			children = (
 				46B038C120460F3800CF97E6 /* QuoteClient.h */,
 				46B038C220460F3800CF97E6 /* QuoteClient.m */,
+				46DE99F9205409F100A45AF5 /* QuoteRequestBuilder.h */,
+				46DE99FA205409F100A45AF5 /* QuoteRequestBuilder.m */,
 			);
 			path = Network;
 			sourceTree = "<group>";
@@ -272,6 +277,7 @@
 				46B038C320460F3800CF97E6 /* QuoteClient.m in Sources */,
 				4604A72E203E1C0800465ACC /* main.m in Sources */,
 				4604A720203E1C0800465ACC /* AppDelegate.m in Sources */,
+				46DE99FB205409F100A45AF5 /* QuoteRequestBuilder.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

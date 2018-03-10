@@ -7,15 +7,24 @@
 //
 
 #import "QuoteClient.h"
+#import "QuoteRequestBuilder.h"
+
 #import "BNRequestRunner.h"
 #import "BNRequest.h"
 #import "BNConnectorURLSession.h"
+#import "BNRequestBuildersRegistry.h"
+
+// Need to remove
 #import <Bolts/BFCancellationTokenSource.h>
 
 // https://quotes.rest/
 
 @interface Quote ()
 
+@end
+
+@interface BNRequest (Quote)
++ (instancetype)requestWithName:(NSString *)name responseParser:(BNResponseParser)parser completion:(BNRequestCompletion)completion;
 @end
 
 @interface QuoteClient ()
@@ -25,7 +34,10 @@
 @implementation QuoteClient
 
 + (QuoteClient*)client {
-    BNRequestRunner *runner = [[BNRequestRunner alloc] initWithConnector:[[BNConnectorURLSession alloc] init]];
+    QuoteRequestBuilder *builder = [[QuoteRequestBuilder alloc] init];
+    // TODO Client do not need to create registry manually
+    BNRequestBuildersRegistry *registry = [[BNRequestBuildersRegistry alloc] initWithDefaultBuilder:builder];
+    BNRequestRunner *runner = [[BNRequestRunner alloc] initWithConnector:[[BNConnectorURLSession alloc] init] requestBuilderRegistry:registry];
     return [[[self class] alloc] initWithRequestRunner:runner];
 }
 
@@ -37,20 +49,26 @@
 }
 
 - (void)quoteOfTheDay:(QODCallback)callback {
-    BNRequest *request = [[BNRequest alloc] initWithRequestBuilder:^NSURLRequest *(){
-        return [NSURLRequest requestWithURL:[NSURL URLWithString:@"https://quotes.rest/qod.json"]];
-    }
-                                                    responseParser:^BNResult *(NSData *response) {
-                                                        return [BNResult value:[Quote new]];
-                                                    }
-                                                        parameters:BNDefaultParameters()
-                                                        completion:callback];
+    BNRequest *request = [BNRequest requestWithName:@"qod"
+                                     responseParser:^BNResult<Quote*> *(NSData *response) {
+                                         return [BNResult value:[Quote new]];
+                                     }
+                                         completion:callback];
     BFCancellationTokenSource *cancelationSource = [BFCancellationTokenSource cancellationTokenSource];
     [self.requestRunner runRequestAsync:request cancellationToken:cancelationSource.token];
 }
 
 @end
 
+@implementation BNRequest (Quote)
+
++ (instancetype)requestWithName:(NSString *)name responseParser:(BNResponseParser)parser completion:(BNRequestCompletion)completion {
+    return [[BNRequest alloc] initWithRequestBuilder:^NSURLRequest *(QuoteRequestBuilder *builder) {
+        return [builder requestWithEndpoint:name];
+    } responseParser:parser parameters:BNDefaultParameters() completion:completion];
+}
+
+@end
 
 @implementation Quote
 

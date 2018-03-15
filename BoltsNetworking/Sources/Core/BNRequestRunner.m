@@ -10,11 +10,19 @@
 #import <Bolts/BFTask.h>
 #import <Bolts/BFTaskCompletionSource.h>
 #import <Bolts/BFCancellationToken.h>
+#import <Bolts/BFCancellationTokenSource.h>
 #import <Bolts/BFExecutor.h>
 #import "BNNetworkConnector.h"
 #import "BNRequest.h"
 #import "BNRequestBuildersRegistry.h"
 #import "BNRequestRetryStrategy.h"
+
+@interface BNRequestTask: NSObject <BNRequestTask>
+@property (nonatomic) BFCancellationTokenSource *source;
+
+- (instancetype)initWithSource:(BFCancellationTokenSource*)source;
+
+@end
 
 @interface BNRequestRunner ()
 @property (nonatomic) id<BNNetworkConnector> connector;
@@ -36,17 +44,21 @@
     return self;
 }
 
-- (BFTask<__kindof id> *)runRequestAsync:(BNRequest *)request cancellationToken:(nullable BFCancellationToken *)cancellationToken {
+- (id<BNRequestTask>)runRequestAsync:(BNRequest *)request {
+    BFCancellationTokenSource *cancellationTokenSource = [BFCancellationTokenSource cancellationTokenSource];
+    BFCancellationToken *cancellationToken = cancellationTokenSource.token;
     __weak typeof(self) wSelf = self;
-    
-    return [[self performRequestRunningBlock:^id{
+    [[self performRequestRunningBlock:^id{
         typeof(self) sSelf = wSelf;
         return [[sSelf buildURLRequestFromRequest:request] continueWithBlock:^id(BFTask<NSURLRequest *> *task) {
             return [sSelf.connector performDataURLRequest:task.result forRequest:request cancellationToken:cancellationToken];
         }];
     } request:request cancellationToken:cancellationToken]
             continueWithBlock:^id _Nullable(BFTask *task) {
-        
+                if (task.cancelled) {
+                    return nil;
+                }
+                
                 // If there are some errors in request just return task back
                 if (task.error) {
                     [request callCompletionWithValue:nil error:task.error];
@@ -61,10 +73,10 @@
                     return [BFTask taskWithResult:result.value];
                 }
             } cancellationToken:cancellationToken];
+    return [[BNRequestTask alloc] initWithSource:cancellationTokenSource];
 }
 
 - (BFTask<NSURL *> *)runFileDownloadRequest:(BNRequest *)request
-                          cancellationToken:(nullable BFCancellationToken *)cancellationToken
                               progressBlock:(nullable BNProgressBlock)progressBlock {
     return nil; //TODO implement
 }
@@ -116,6 +128,21 @@
         
         return task;
     } cancellationToken:cancellationToken];
+}
+
+@end
+
+@implementation BNRequestTask
+
+- (instancetype)initWithSource:(BFCancellationTokenSource*)source {
+    if ((self = [super init])) {
+        _source = source;
+    }
+    return self;
+}
+
+- (void)cancel {
+    [self.source cancel];
 }
 
 @end

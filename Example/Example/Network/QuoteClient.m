@@ -14,9 +14,6 @@
 #import "BNConnectorURLSession.h"
 #import "BNRequestBuildersRegistry.h"
 
-// Need to remove
-#import <Bolts/BFCancellationTokenSource.h>
-
 // https://quotes.rest/
 
 @interface Quote ()
@@ -54,8 +51,7 @@
                                          return [BNResult value:[Quote new]];
                                      }
                                          completion:callback];
-    BFCancellationTokenSource *cancelationSource = [BFCancellationTokenSource cancellationTokenSource];
-    [self.requestRunner runRequestAsync:request cancellationToken:cancelationSource.token];
+    [self.requestRunner runRequestAsync:request];
 }
 
 @end

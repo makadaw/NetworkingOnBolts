@@ -10,13 +10,17 @@
 
 @class BNRequest;
 @class BNRequestBuildersRegistry;
-@class BFTask<Result>;
-@class BFCancellationToken;
 @protocol BNNetworkConnector;
 
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^BNProgressBlock)(float);
+
+@protocol BNRequestTask <NSObject>
+
+- (void)cancel;
+
+@end
 
 @interface BNRequestRunner : NSObject
 
@@ -24,10 +28,9 @@ typedef void(^BNProgressBlock)(float);
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithConnector:(id<BNNetworkConnector>)connector requestBuilderRegistry:(BNRequestBuildersRegistry *)builderRegistry NS_DESIGNATED_INITIALIZER;
 
-- (BFTask<__kindof id> *)runRequestAsync:(BNRequest *)request cancellationToken:(nullable BFCancellationToken *)cancellationToken;
+- (id<BNRequestTask>)runRequestAsync:(BNRequest *)request;
 
-- (BFTask<NSURL *> *)runFileDownloadRequest:(BNRequest *)request
-                          cancellationToken:(nullable BFCancellationToken *)cancellationToken
+- (id<BNRequestTask>)runFileDownloadRequest:(BNRequest *)request
                               progressBlock:(nullable BNProgressBlock)progressBlock;
 
 @end
